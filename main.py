@@ -25,6 +25,8 @@ import os
 import json
 import hashlib
 import time
+import pytest
+from pytest import ExitCode
 
 ini_array0 = {}
 ini_array0["ver"] = 1.0
