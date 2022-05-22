@@ -27,7 +27,7 @@ import hashlib
 import time
 
 ini_array0 = {}
-ini_array0["ver"] = 1.2
+ini_array0["ver"] = 1.0
 ini_array0["debug"] = False
 ini_array0["exportToDir"] = './'
 ini_array0["consoleLog"] = True
