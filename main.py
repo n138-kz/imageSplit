@@ -113,61 +113,8 @@ for proc_file in sys.argv:
 
     try:
         # https://github.com/n138-kz/Util_of_Genshin-Impact/blob/main/nameTomd5.py
-        # hash計算
-        # https://qiita.com/maboy/items/8ee4c408640700e52274
-        h_algo = ini_array1["hash"]
-        h = hashlib.new(h_algo)
-        h_len = hashlib.new(h_algo).block_size * 0x800
+        pass
 
-        with open(proc_file,'rb') as fp:
-            h_bin = fp.read(h_len)
-
-            while h_bin:
-                h.update(h_bin)
-                h_bin = fp.read(h_len)
-
-        hash_exportdata += h_algo + "\t" + proc_file + "\t" + h.hexdigest() + "\n"
-
-        # neo name
-        neo_file = ini_array1["exportListRule"].replace('{hash}', h.hexdigest()) + str(os.path.splitext(proc_file)[len(os.path.splitext(proc_file))-1]).lower()
-
-        # exist check
-        if os.path.isfile(neo_file):
-            proc_file_count_fail += 1
-
-            console_print_temp = 'W: Already exist neo file. skipping. old=\'' + proc_file + '\' neo=\'' + neo_file + '\''
-            console_print += console_print_temp + "\n"
-            if debug:
-                print(console_print_temp, file=sys.stderr)
-
-            continue
-
-        # rename
-        os.rename(proc_file, neo_file)
-
-        console_print_temp = 'N: Renamed file. old=\'' + proc_file + '\' neo=\'' + neo_file + '\''
-        console_print += console_print_temp + "\n"
-        if debug:
-            print(console_print_temp)
-
-        if ini_array1["updateMtime"]:
-            os.utime(neo_file, None)
-
-        proc_file_count_done += 1
-    except ValueError as e:
-        console_print_temp = 'E: ' + str(type(e)) + ' ' + str(e)
-        console_print += console_print_temp + "\n"
-        print(console_print_temp, file=sys.stderr)
-
-        proc_file_count_fail += 1
-        continue
-    except PermissionError as e:
-        console_print_temp = 'E: ' + str(type(e)) + ' ' + str(e)
-        console_print += console_print_temp + "\n"
-        print(console_print_temp, file=sys.stderr)
-
-        proc_file_count_fail += 1
-        continue
     except:
         import traceback
         traceback.print_exc()
@@ -175,21 +122,17 @@ for proc_file in sys.argv:
         sys.exit(1)
 
 
-console_print_temp = 'N: Summary:\n   Total:   ' + str(proc_file_count) + '\n   Success: ' + str(proc_file_count_done) + '\n   Failure: ' + str(proc_file_count_fail)
+console_print_temp = 'N: Summary:'
 console_print += console_print_temp + "\n"
+console_print_temp = '   Total:   ' + str(proc_file_count)
+console_print += console_print_temp + "\n"
+console_print_temp = '   Success: ' + str(proc_file_count_done)
+console_print += console_print_temp + "\n"
+console_print_temp = '   Failure: ' + str(proc_file_count_fail)
+console_print += console_print_temp + "\n"
+
 if debug:
     print(console_print_temp)
-
-
-if ini_array1["exportList"]:
-    try:
-        with open(ini_array1["exportToDir"] + ini_array1["exportListFile"], encoding='UTF-8', mode='w') as fp:
-            fp.write(hash_exportdata)
-    except:
-        import traceback
-        traceback.print_exc()
-        time.sleep(5)
-        sys.exit(1)
 
 if ini_array1["consoleLog"]:
     try:
