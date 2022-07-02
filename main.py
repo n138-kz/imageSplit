@@ -22,126 +22,119 @@
 
 import sys
 import os
-import json
-import hashlib
 import time
-import pytest
-from pytest import ExitCode
+import cv2 as cv
+import numpy
+import matplotlib
 
-ini_array0 = {}
-ini_array0["ver"] = 1.0
-ini_array0["debug"] = False
-ini_array0["exportToDir"] = './'
-ini_array0["consoleLog"] = True
-ini_array0["consoleLogRule"] = '{TIME}-console.log'
-ini_array1 = {}
-ini_array1.update(ini_array0)
+print('> init')
 
-console_print = ''
-console_print_temp = ''
+# 引数 数チェック
+print('> check count')
+if len(sys.argv) <= 1:
+    print('Require the args')
+    print('')
+    sys.exit(1);
 
-# 設定ファイルが無いとき作成
-ini_file = os.path.basename(sys.argv[0])
-ini_file = os.path.splitext(os.path.basename(ini_file))[0] + '.json'
-if not(os.path.isfile(ini_file)):
-    console_print_temp = 'E: No such config.'
-    print(console_print_temp, file=sys.stderr)
+# 引数の先頭(__FILE__)を削除
+args = sys.argv
+del args[0]
 
-    try:
-        with open(ini_file, encoding='UTF-8', mode='w') as fp:
-            fp.write(json.dumps(ini_array0))
+# ファイルリスト
+print('> list')
+for argv in args:
+    print('   ',end='')
+    print('- ',end='')
+    print(argv)
+print('')
 
-        console_print_temp = 'N: Creating... file=\'' + ini_file + '\''
-        print(console_print_temp, file=sys.stderr)
-
-    except Exception as e:
-        console_print_temp = 'E: ' + str(type(e)) + ' ' + str(e)
-        print(console_print_temp, file=sys.stderr)
-
-    time.sleep(5)
-    sys.exit(1)
-
-# 設定読み込み
-try:
-    with open(ini_file, encoding='UTF-8', mode='r') as fp:
-        ini_temp = fp.read()
-        ini_array1.update(json.loads(ini_temp))
-
-except json.decoder.JSONDecodeError as e:
-    console_print_temp = 'E: ' + str(type(e)) + ' ' + str(e)
-    print(console_print_temp, file=sys.stderr)
-
-    time.sleep(5)
-    sys.exit(1)
-
-# バージョンチェック
-if ini_array0["ver"] != ini_array1["ver"]:
-    console_print_temp = 'E: Mismatch config version.'
-    print(console_print_temp, file=sys.stderr)
-
-    time.sleep(5)
-    sys.exit(1)
-
-# 変数値正規化
-debug = ini_array1["debug"]
-ini_array1["consoleLogRule"] = ini_array1["consoleLogRule"].replace('{TIME}', str(int(time.time())))
-
-# ライン引数からファイルリスト生成
-argv = sys.argv
-argv.pop(0)
-argc = len(sys.argv)
-if not(argc > 0):
-    # ファイルリストが無いとき
-    print('E: Require any files', file=sys.stderr)
-
-    time.sleep(5)
-    sys.exit(1)
-
-proc_file_count = 0
-proc_file_count_done = 0
-proc_file_count_fail = 0
-
-for proc_file in sys.argv:
-    proc_file_count += 1
-
-    if not(os.path.isfile(proc_file)):
-        proc_file_count_fail += 1
-        console_print_temp = 'W: Unable to load file. skipping. \'' + proc_file + '\''
-        console_print += console_print_temp + "\n"
-        if debug:
-            print(console_print_temp, file=sys.stderr)
-
+# ファイル存在チェック
+# 存在しない場合はリストから削除
+print('> check exist true')
+for argv in args:
+    print('   ',end='')
+    print('file .... ' + argv)
+    print('   ',end='')
+    print('exist ... ',end='')
+    if not os.path.isfile(argv):
+        args.remove(argv)
+        print('no')
+        print()
         continue
+    print('yes')
+    print()
 
+# 引数 数チェック
+print('> check count dump')
+print(len(args))
+print()
+
+if len(args) < 1:
+    print('No effective item in list')
+    sys.exit(1);
+
+# ファイルリスト
+print('> list')
+for argv in args:
+    print('   ' + '- ' + argv)
+print()
+
+# 画像ファイルか判断
+print('> check image quiet')
+for argv in args:
+    file = cv.imread(argv, -1)
+    if file is None:
+        args.remove(argv)
+
+# ファイルリスト
+print('> list')
+for argv in args:
+    print('   ',end='')
+    print('- ',end='')
+    print(argv)
+print()
+
+# 画像ファイルの幅＆高さ取得
+print('> get size')
+for argv in args:
+    print('   ' + 'file .... ' + argv)
+    img = cv.imread(argv, -1)
     try:
-        # https://github.com/n138-kz/Util_of_Genshin-Impact/blob/main/nameTomd5.py
-        pass
+        # マルチバイトファイル名非対応
+        img_h,img_w,img_c = img.shape[:3]
+        print('   ' + 'height ... ' + str(img_h))
+        print('   ' + 'width .... ' + str(img_w))
+        print('   ' + 'channel .. ' + str(img_c))
+    except AttributeError as e:
+        img_h = img_w = img_c = 0
+        args.remove(argv)
+        continue
+    print()
 
-    except:
-        import traceback
-        traceback.print_exc()
-        time.sleep(30)
-        sys.exit(1)
+# 画像ファイルを横方向半分に分割
+print('> set size half-width export')
+for argv in args:
+    print('   ' + 'file .... ' + argv)
+    img = cv.imread(argv, -1)
 
+    # マルチバイトファイル名非対応
+    img_h,img_w,img_c = img.shape[:3]
+    img1_h,img1_w = int(img_h / 2), int(img_w / 2)
+    img2_h,img2_w = img_h - img1_h, img_w - img1_w
 
-console_print_temp = 'N: Summary:'
-console_print += console_print_temp + "\n"
-console_print_temp = '   Total:   ' + str(proc_file_count)
-console_print += console_print_temp + "\n"
-console_print_temp = '   Success: ' + str(proc_file_count_done)
-console_print += console_print_temp + "\n"
-console_print_temp = '   Failure: ' + str(proc_file_count_fail)
-console_print += console_print_temp + "\n"
+    print('   ' + 'height ... ' + str(img_h))
+    print('   ' + 'width .... ' + str(img_w))
 
-if debug:
-    print(console_print_temp)
+    argvExt = os.path.splitext(argv)
+    argv1 = argvExt[0] + '_1' + argvExt[1]
+    argv2 = argvExt[0] + '_2' + argvExt[1]
 
-if ini_array1["consoleLog"]:
-    try:
-        with open(ini_array1["exportToDir"] + ini_array1["consoleLogRule"], encoding='UTF-8', mode='w') as fp:
-            fp.write(console_print)
-    except:
-        import traceback
-        traceback.print_exc()
-        time.sleep(5)
-        sys.exit(1)
+    print('-->' + 'file .... ' + argv1)
+    print('-->' + 'height ... ' + str(img1_h))
+    print('-->' + 'width .... ' + str(img1_w))
+
+    print('-->' + 'file .... ' + argv2)
+    print('-->' + 'height ... ' + str(img2_h))
+    print('-->' + 'width .... ' + str(img2_w))
+
+time.sleep(5)
