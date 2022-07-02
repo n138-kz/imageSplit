@@ -137,4 +137,10 @@ for argv in args:
     print('-->' + 'height ... ' + str(img2_h))
     print('-->' + 'width .... ' + str(img2_w))
 
+    img1 = img[0 : img_h, 0 : img1_w]
+    cv.imwrite(argv1, img1)
+
+    img2 = img[0 : img_h, (img1_w+1) : img_w]
+    cv.imwrite(argv2, img2)
+
 time.sleep(5)
