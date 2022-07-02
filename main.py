@@ -119,28 +119,28 @@ for argv in args:
 
     # マルチバイトファイル名非対応
     img_h,img_w,img_c = img.shape[:3]
-    img1_h,img1_w = int(img_h / 2), int(img_w / 2)
-    img2_h,img2_w = img_h - img1_h, img_w - img1_w
+    imgL_h,imgL_w = int(img_h / 2), int(img_w / 2)
+    imgR_h,imgR_w = img_h - imgL_h, img_w - imgL_w
 
     print('   ' + 'height ... ' + str(img_h))
     print('   ' + 'width .... ' + str(img_w))
 
     argvExt = os.path.splitext(argv)
-    argv1 = argvExt[0] + '_1' + argvExt[1]
-    argv2 = argvExt[0] + '_2' + argvExt[1]
+    argvL = argvExt[0] + '_2' + argvExt[1]
+    argvR = argvExt[0] + '_1' + argvExt[1]
 
-    print('-->' + 'file .... ' + argv1)
-    print('-->' + 'height ... ' + str(img1_h))
-    print('-->' + 'width .... ' + str(img1_w))
+    print('-->' + 'file .... ' + argvL)
+    print('-->' + 'height ... ' + str(imgL_h))
+    print('-->' + 'width .... ' + str(imgL_w))
 
-    print('-->' + 'file .... ' + argv2)
-    print('-->' + 'height ... ' + str(img2_h))
-    print('-->' + 'width .... ' + str(img2_w))
+    print('-->' + 'file .... ' + argvR)
+    print('-->' + 'height ... ' + str(imgR_h))
+    print('-->' + 'width .... ' + str(imgR_w))
 
-    img1 = img[0 : img_h, 0 : img1_w]
-    cv.imwrite(argv1, img1)
+    imgL = img[0 : img_h, 0 : imgL_w]
+    cv.imwrite(argvL, imgL)
 
-    img2 = img[0 : img_h, (img1_w+1) : img_w]
-    cv.imwrite(argv2, img2)
+    imgR = img[0 : img_h, (imgL_w+1) : img_w]
+    cv.imwrite(argvR, imgR)
 
 time.sleep(5)
